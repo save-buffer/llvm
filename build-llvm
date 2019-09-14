@@ -1,0 +1,12 @@
+#!/bin/bash
+SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
+cd ~/llvm/llvm-project
+git fetch
+git diff origin/master > $SCRIPT_PATH/cloudbuild/p.patch
+cd $SCRIPT_PATH/cloudbuild
+gcloud builds submit --config cloudbuild.yaml .
+
+PROJECT_ID=llvm-252422
+cd $SCRIPT_PATH
+gsutil cp gs://${PROJECT_ID}_cloudbuild/build.tar .
+tar xvf build.tar

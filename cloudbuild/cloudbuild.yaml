@@ -1,0 +1,23 @@
+steps:
+- name: 'gcr.io/kaniko-project/executor:latest'
+  args:
+    - --destination=gcr.io/$PROJECT_ID/image
+    - --cache=true
+    - --cache-ttl=168h
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['container', 'create', '--name', 'img', 'gcr.io/$PROJECT_ID/image']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['cp', 'build_things.sh', 'img:/build_things.sh']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['cp', 'p.patch', 'img:/p.patch']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['start', '-a', 'img']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['cp', 'img:/build.tar', 'build.tar']
+artifacts:
+  objects:
+    location: gs://${PROJECT_ID}_cloudbuild
+    paths: build.tar
+options:
+  machineType: 'N1_HIGHCPU_32'
+timeout: 1800s
